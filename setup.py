@@ -70,6 +70,8 @@ class UploadCommand(Command):
         except OSError:
             pass
 
+        os.system('{0} -m pip install twine wheel'.format(sys.executable))
+
         self.status('Building Source and Wheel (universal) distribution…')
         os.system('{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
 
