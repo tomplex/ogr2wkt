@@ -83,7 +83,7 @@ class UploadCommand(Command):
         os.system('git push --tags')
 
         self.status("Cleaning up...")
-        os.system('rm -rf dist build')
+        os.system('rm -rf dist build ogr2wkt.egg-info')
         sys.exit()
 
 

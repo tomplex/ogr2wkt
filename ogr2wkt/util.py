@@ -27,18 +27,27 @@ class wkt_dialect(csv.unix_dialect):
 
 
 def create_line(feature: Dict[str, Any]) -> Iterable:
-    return chain([feature['id']], map(str, feature['properties'].values()), [wkt.dumps(feature['geometry'])])
+    return chain(
+        [feature['id']],
+        (str(value) for value in feature['properties'].values()),
+        [wkt.dumps(feature['geometry'])]
+    )
 
 
 def list_fields(src: fiona.Collection) -> list:
-    return list(chain(['id'], map(lambda n: n.lower(), src.schema['properties'].keys()), ['wkt']))
+    return list(chain(
+        ['id'],
+        (key.lower() for key in src.schema['properties'].keys()),
+        ['wkt'])
+    )
 
 
-def convert_to_wkt(input_file, output_file):
+def convert_to_wkt(input_file: str, output_file: str):
+
     with fiona.open(input_file) as src, \
             open(output_file, 'w') as output_fobj:
         writer = csv.writer(output_fobj, dialect=wkt_dialect)
         writer.writerow(list_fields(src))
 
         for group in grouper(1000, src):
-            writer.writerows(map(create_line, group))
+            writer.writerows((create_line(row) for row in group if row['geometry'] is not None))
